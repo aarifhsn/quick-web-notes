@@ -13,7 +13,7 @@
         </p>
         <p>
             <label for="note_content">Content:</label><br>
-            <textarea name="note_content" id="note_content" required class="large-text" rows="3"></textarea>
+            <textarea name="note_content" id="note_content" class="large-text" rows="3"></textarea>
         </p>
         <p>
             <input type="submit" name="submit_note" class="button button-primary" value="Add Note">

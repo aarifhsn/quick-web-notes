@@ -57,13 +57,24 @@ class Quick_Web_Notes_Admin
     }
 
 
-    public function render_admin_page()
+    public function render_admin_page($orderby = 'created_at', $order = 'DESC')
     {
         $this->handle_note_edit();
 
+        // Allowed order by columns to prevent SQL injection
+        $allowed_orderby = array('title', 'content', 'created_at');
+        $allowed_order = array('ASC', 'DESC');
+
+        // Sanitize orderby
+        $orderby = in_array($orderby, $allowed_orderby) ? $orderby : 'created_at';
+
+        // Sanitize order
+        $order = in_array(strtoupper($order), $allowed_order) ? strtoupper($order) : 'ASC';
+
         // Handle sorting
-        $orderby = isset($_GET['orderby']) ? $_GET['orderby'] : 'created_at';
-        $order = isset($_GET['order']) ? $_GET['order'] : 'DESC';
+        $orderby = esc_sql($orderby);
+        $order = esc_sql($order);
+
         $notes = $this->get_all_notes($orderby, $order);
 
         require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/admin/views/admin-page.php';
@@ -77,82 +88,178 @@ class Quick_Web_Notes_Admin
 
     public function process_note_submission()
     {
-        if (isset($_POST['submit_note'])) {
-            if (!isset($_POST['note_nonce']) || !wp_verify_nonce($_POST['note_nonce'], 'add_note')) {
-                wp_die('Security check failed');
-            }
-            $title = sanitize_text_field($_POST['note_title']);
-            $content = sanitize_textarea_field($_POST['note_content']);
+        // First check if the form was submitted
+        if (!isset($_POST['submit_note'])) {
+            return;
+        }
 
-            $result = $this->wpdb->insert(
-                $this->table_name,
-                array(
-                    'title' => $title,
-                    'content' => $content
-                )
-            );
-            // Add a transient to display a success message
+        // Verify nonce exists and is valid
+        if (
+            !isset($_POST['note_nonce']) ||
+            !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['note_nonce'])), 'add_note')
+        ) {
+            wp_die('Security check failed');
+        }
+
+        // Validate and sanitize title
+        $title = '';
+        if (isset($_POST['note_title'])) {
+            $title = sanitize_text_field(wp_unslash($_POST['note_title']));
+        }
+
+        // Validate and sanitize content
+        $content = '';
+        if (isset($_POST['note_content'])) {
+            $content = sanitize_textarea_field(wp_unslash($_POST['note_content']));
+        }
+
+        // Verify we have at least a title or content
+        if (empty($title)) {
             set_transient('quick_web_notes_message', [
-                'type' => $result ? 'success' : 'error',
-                'message' => $result ? 'Note added successfully!' : 'Failed to add note. Please try again.'
+                'type' => 'error',
+                'message' => 'Please enter a title for the note.'
             ], 30);
-
             wp_redirect(admin_url('admin.php?page=quick-web-notes-manager'));
             exit;
         }
+
+        // Insert the note
+        $result = $this->wpdb->insert(
+            $this->table_name,
+            array(
+                'title' => $title,
+                'content' => $content
+            )
+        );
+
+        // Set message transient
+        set_transient('quick_web_notes_message', [
+            'type' => $result ? 'success' : 'error',
+            'message' => $result ? 'Note added successfully!' : 'Failed to add note. Please try again.'
+        ], 30);
+
+        wp_redirect(admin_url('admin.php?page=quick-web-notes-manager'));
+        exit;
     }
 
 
     private function handle_note_edit()
     {
-        if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
-            $this->wpdb->update(
-                $this->table_name,
-                array(
-                    'title' => sanitize_text_field($_GET['title']),
-                    'content' => sanitize_textarea_field($_GET['content']),
-                ),
-                array('id' => $_GET['id'])
-            );
+        // Check if this is an edit action
+        if (!isset($_GET['action']) || $_GET['action'] !== 'edit' || !isset($_GET['id'])) {
+            return;
         }
+
+        // Verify nonce
+        if (
+            !isset($_GET['edit_nonce']) ||
+            !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['edit_nonce'])), 'edit_note_' . absint($_GET['id']))
+        ) {
+            wp_die('Security check failed');
+        }
+
+        // Validate and sanitize ID
+        $note_id = absint($_GET['id']);
+        if (!$note_id) {
+            return;
+        }
+
+        // Validate and sanitize title and content
+        $title = '';
+        if (isset($_GET['title'])) {
+            $title = sanitize_text_field(wp_unslash($_GET['title']));
+        }
+
+        $content = '';
+        if (isset($_GET['content'])) {
+            $content = sanitize_textarea_field(wp_unslash($_GET['content']));
+        }
+
+        // Verify we have data to update
+        if (empty($title) && empty($content)) {
+            return;
+        }
+
+        // Prepare update data
+        $update_data = array();
+        if (!empty($title)) {
+            $update_data['title'] = $title;
+        }
+        if (!empty($content)) {
+            $update_data['content'] = $content;
+        }
+
+        // Update the note
+        $result = $this->wpdb->update(
+            $this->table_name,
+            $update_data,
+            array('id' => $note_id)
+        );
+
+        // Set result message
+        set_transient('quick_web_notes_message', [
+            'type' => $result ? 'success' : 'error',
+            'message' => $result ? 'Note updated successfully!' : 'Failed to update note. Please try again.'
+        ], 30);
     }
 
     public function process_note_deletion()
     {
-        if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
-            if (!isset($_GET['delete_nonce']) || !wp_verify_nonce($_GET['delete_nonce'], 'delete_note_' . $_GET['id'])) {
-                wp_die('Security check failed');
-            }
-
-            $result = $this->wpdb->delete($this->table_name, array('id' => $_GET['id']));
-
-            // Add a transient for a success message
-            set_transient('quick_web_notes_message', [
-                'type' => $result ? 'success' : 'error',
-                'message' => $result ? 'Note deleted successfully!' : 'Failed to delete note. Please try again.'
-            ], 30);
+        // Check if this is a delete action
+        if (!isset($_GET['action']) || $_GET['action'] !== 'delete' || !isset($_GET['id'])) {
+            return;
         }
+
+        // Validate and sanitize ID
+        $note_id = absint($_GET['id']);
+        if (!$note_id) {
+            return;
+        }
+
+        // Verify nonce
+        if (
+            !isset($_GET['delete_nonce']) ||
+            !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['delete_nonce'])), 'delete_note_' . $note_id)
+        ) {
+            wp_die('Security check failed');
+        }
+
+        // Delete the note
+        $result = $this->wpdb->delete(
+            $this->table_name,
+            array('id' => $note_id)
+        );
+
+        // Set result message
+        set_transient('quick_web_notes_message', [
+            'type' => $result ? 'success' : 'error',
+            'message' => $result ? 'Note deleted successfully!' : 'Failed to delete note. Please try again.'
+        ], 30);
     }
 
     private function get_all_notes($orderby = 'created_at', $order = 'DESC')
     {
-        // Whitelist of allowed columns for ordering
+        global $wpdb;
+
+        // Allowed order by columns to prevent SQL injection
         $allowed_orderby = array('title', 'content', 'created_at');
+        $allowed_order = array('ASC', 'DESC');
 
         // Sanitize orderby
         $orderby = in_array($orderby, $allowed_orderby) ? $orderby : 'created_at';
 
         // Sanitize order
-        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        $order = in_array(strtoupper($order), $allowed_order) ? strtoupper($order) : 'ASC';
 
-        // Use prepare with %s placeholders for dynamic column names
-        return $this->wpdb->get_results(
-            $this->wpdb->prepare(
-                "SELECT * FROM {$this->table_name} ORDER BY %s %s",
-                $orderby,
-                $order
-            )
+        // Use $wpdb->prepare with a placeholder that won't be escaped
+        $sql = $wpdb->prepare(
+            "SELECT * FROM $this->table_name ORDER BY `%1s` %2s",
+            $orderby,
+            $order
         );
+
+        // Get all notes
+        return $wpdb->get_results($sql);
     }
 
     public function process_bulk_actions()
@@ -180,12 +287,15 @@ class Quick_Web_Notes_Admin
                 $placeholders = array_fill(0, count($ids), '%d');
                 $placeholder_string = implode(',', $placeholders);
 
-                $result = $this->wpdb->query(
-                    $this->wpdb->prepare(
-                        "DELETE FROM {$this->table_name} WHERE id IN ($placeholder_string)",
-                        $ids
-                    )
+                // Escape table name
+                $table = esc_sql($this->table_name);
+
+                // Prepare and execute the query
+                $query = $this->wpdb->prepare(
+                    "DELETE FROM {$table} WHERE id IN ($placeholder_string)",
+                    $ids
                 );
+                $result = $this->wpdb->query($query);
 
                 // Store result in transient
                 set_transient('quick_web_notes_bulk_delete_result', [
@@ -209,6 +319,7 @@ class Quick_Web_Notes_Admin
         if ($result) {
             if ($result['status'] === 'success') {
                 $count = $result['count'];
+                /* translators: %s: number of notes deleted */
                 $message = sprintf(
                     _n(
                         '%s note deleted successfully.',
@@ -246,8 +357,8 @@ class Quick_Web_Notes_Admin
         $title = sanitize_text_field($_POST['title']);
         $content = sanitize_textarea_field($_POST['content']);
 
-        if (empty($title) || empty($content)) {
-            wp_send_json_error('Title and content are required');
+        if (empty($title) && empty($content)) {
+            wp_send_json_error('Title or Content is required');
             return;
         }
 
@@ -278,7 +389,7 @@ class Quick_Web_Notes_Admin
         // Enqueue CSS
         wp_enqueue_style(
             'quick-web-notes-admin-style',
-            plugins_url('assets/css/quick-web-notes-style.css', dirname(dirname(__FILE__))),
+            plugins_url('assets/css/quick-web-notes-admin-style.css', dirname(dirname(__FILE__))),
             array(),
             '1.0.0'
         );

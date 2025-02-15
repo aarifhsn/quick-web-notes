@@ -55,8 +55,8 @@ jQuery(document).ready(function ($) {
     const title = $("#modal_note_title").val();
     const content = $("#modal_note_content").val();
 
-    if (!title || !content) {
-      alert("Please fill in all required fields");
+    if (!title) {
+      alert("Please fill the required field");
       return;
     }
 
@@ -155,8 +155,8 @@ jQuery(document).ready(function ($) {
     const title = $("#edit_note_title").val();
     const content = $("#edit_note_content").val();
 
-    if (!title || !content) {
-      alert("Please fill in all required fields");
+    if (!title) {
+      alert("Please fill the required field");
       return;
     }
 

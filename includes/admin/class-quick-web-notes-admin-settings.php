@@ -16,15 +16,14 @@ class Quick_Web_Notes_Admin_Settings
 
     public function enqueue_admin_assets($hook)
     {
-
         // Only load on our plugin's settings page
-        if ('notes-manager_page_simple-notes-settings' !== $hook) {
+        if ('notes-manager_page_quick-web-notes-settings' !== $hook) {
             return;
         }
 
         // Enqueue CSS
         wp_enqueue_style(
-            'simple-notes-admin-style',
+            'quick-web-notes-admin-style',
             plugins_url('assets/css/quick-web-notes-admin-style.css', dirname(dirname(__FILE__))),
             array(),
             '1.0.0'
@@ -36,11 +35,11 @@ class Quick_Web_Notes_Admin_Settings
     public function add_settings_page()
     {
         add_submenu_page(
-            'simple-notes-manager',
+            'quick-web-notes-manager',
             'Settings',
             'Settings',
             'manage_options',
-            'simple-notes-settings',
+            'quick-web-notes-settings',
             array($this, 'render_settings_page')
         );
     }

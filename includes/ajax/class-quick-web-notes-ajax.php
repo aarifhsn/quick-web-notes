@@ -35,8 +35,8 @@ class Quick_Web_Notes_Ajax
         $title = sanitize_text_field($_POST['title']);
         $content = sanitize_textarea_field($_POST['content']);
 
-        if (empty($title) || empty($content)) {
-            wp_send_json_error('Title and content are required');
+        if (empty($title) && empty($content)) {
+            wp_send_json_error('Title or Content is required');
             return;
         }
 
@@ -76,8 +76,8 @@ class Quick_Web_Notes_Ajax
         $title = sanitize_text_field($_POST['title']);
         $content = sanitize_textarea_field($_POST['content']);
 
-        if (empty($title) || empty($content)) {
-            wp_send_json_error('Title and content are required');
+        if (empty($title) && empty($content)) {
+            wp_send_json_error('Title or Content is required');
             return;
         }
 

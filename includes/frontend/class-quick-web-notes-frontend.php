@@ -130,8 +130,8 @@ class Quick_Web_Notes_Frontend
                             <input type="text" id="modal_note_title" required class="regular-text">
                         </p>
                         <p>
-                            <label for="modal_note_content">Content: <span class="required">*</span></label><br>
-                            <textarea id="modal_note_content" required class="large-text" rows="10"></textarea>
+                            <label for="modal_note_content">Content: </label><br>
+                            <textarea id="modal_note_content" class="large-text" rows="4"></textarea>
                         </p>
                         <p>
                             <button type="submit" class="button button-primary">Save Note</button>
@@ -156,8 +156,8 @@ class Quick_Web_Notes_Frontend
                             <input type="text" id="edit_note_title" required class="regular-text">
                         </p>
                         <p>
-                            <label for="edit_note_content">Content: <span class="required">*</span></label><br>
-                            <textarea id="edit_note_content" required class="large-text" rows="10"></textarea>
+                            <label for="edit_note_content">Content: </label><br>
+                            <textarea id="edit_note_content" class="large-text" rows="4"></textarea>
                         </p>
                         <p>
                             <button type="submit" class="button button-primary">Update Note</button>
