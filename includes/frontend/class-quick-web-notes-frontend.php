@@ -98,7 +98,7 @@ class Quick_Web_Notes_Frontend
         ?>
         <!-- Fixed Button -->
         <div id="simple-notes-fixed-btn" class="simple-notes-fixed-button note-button">
-            <button class="button"><img src="<?php echo plugins_url('../../assets/icons/note.png', __FILE__); ?>"
+            <button class="button"><img src="<?php echo esc_url(plugins_url('../../assets/icons/note.png', __FILE__)); ?>"
                     alt="Note Icon"></button>
         </div>
 

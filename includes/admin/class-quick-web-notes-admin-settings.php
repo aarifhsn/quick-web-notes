@@ -138,10 +138,10 @@ class Quick_Web_Notes_Admin_Settings
         <script type="text/javascript">
             jQuery(document).ready(function ($) {
                 function updatePreview() {
-                    var verticalPos = $('select[name="<?php echo $this->options_name; ?>[vertical_position]"]').val();
-                    var horizontalPos = $('select[name="<?php echo $this->options_name; ?>[horizontal_position]"]').val();
-                    var verticalOffset = $('input[name="<?php echo $this->options_name; ?>[vertical_offset]"]').val();
-                    var horizontalOffset = $('input[name="<?php echo $this->options_name; ?>[horizontal_offset]"]').val();
+                    var verticalPos = $('select[name="<?php echo esc_attr($this->options_name); ?>[vertical_position]"]').val();
+                    var horizontalPos = $('select[name="<?php echo esc_attr($this->options_name); ?>[horizontal_position]"]').val();
+                    var verticalOffset = $('input[name="<?php echo esc_attr($this->options_name); ?>[vertical_offset]"]').val();
+                    var horizontalOffset = $('input[name="<?php echo esc_attr($this->options_name); ?>[horizontal_offset]"]').val();
 
                     $('#preview-icon').css({
                         'top': verticalPos === 'top' ? verticalOffset + 'px' : 'auto',
@@ -169,7 +169,7 @@ class Quick_Web_Notes_Admin_Settings
         $options = get_option($this->options_name);
         $value = isset($options['vertical_position']) ? $options['vertical_position'] : 'bottom';
         ?>
-        <select name="<?php echo $this->options_name; ?>[vertical_position]">
+        <select name="<?php echo esc_attr($this->options_name); ?>[vertical_position]">
             <option value="top" <?php selected($value, 'top'); ?>>Top</option>
             <option value="bottom" <?php selected($value, 'bottom'); ?>>Bottom</option>
         </select>
@@ -181,8 +181,8 @@ class Quick_Web_Notes_Admin_Settings
         $options = get_option($this->options_name);
         $value = isset($options['vertical_offset']) ? $options['vertical_offset'] : '20';
         ?>
-        <input type="number" name="<?php echo $this->options_name; ?>[vertical_offset]" value="<?php echo esc_attr($value); ?>"
-            min="0" max="1000">
+        <input type="number" name="<?php echo esc_attr($this->options_name); ?>[vertical_offset]"
+            value="<?php echo esc_attr($value); ?>" min="0" max="1000">
         <?php
     }
 
@@ -191,7 +191,7 @@ class Quick_Web_Notes_Admin_Settings
         $options = get_option($this->options_name);
         $value = isset($options['horizontal_position']) ? $options['horizontal_position'] : 'right';
         ?>
-        <select name="<?php echo $this->options_name; ?>[horizontal_position]">
+        <select name="<?php echo esc_attr($this->options_name); ?>[horizontal_position]">
             <option value="left" <?php selected($value, 'left'); ?>>Left</option>
             <option value="right" <?php selected($value, 'right'); ?>>Right</option>
         </select>
@@ -203,7 +203,7 @@ class Quick_Web_Notes_Admin_Settings
         $options = get_option($this->options_name);
         $value = isset($options['horizontal_offset']) ? $options['horizontal_offset'] : '30';
         ?>
-        <input type="number" name="<?php echo $this->options_name; ?>[horizontal_offset]"
+        <input type="number" name="<?php echo esc_attr($this->options_name); ?>[horizontal_offset]"
             value="<?php echo esc_attr($value); ?>" min="0" max="1000">
         <?php
     }
@@ -213,8 +213,8 @@ class Quick_Web_Notes_Admin_Settings
         $options = get_option($this->options_name);
         $value = isset($options['z_index']) ? $options['z_index'] : '9998';
         ?>
-        <input type="number" name="<?php echo $this->options_name; ?>[z_index]" value="<?php echo esc_attr($value); ?>" min="1"
-            max="99999">
+        <input type="number" name="<?php echo esc_attr($this->options_name); ?>[z_index]"
+            value="<?php echo esc_attr($value); ?>" min="1" max="99999">
         <?php
     }
 

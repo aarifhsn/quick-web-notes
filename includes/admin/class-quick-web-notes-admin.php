@@ -66,10 +66,10 @@ class Quick_Web_Notes_Admin
         $allowed_order = array('ASC', 'DESC');
 
         // Sanitize orderby
-        $orderby = in_array($orderby, $allowed_orderby) ? $orderby : 'created_at';
+        $orderby = in_array($orderby, $allowed_orderby, true) ? $orderby : 'created_at';
 
         // Sanitize order
-        $order = in_array(strtoupper($order), $allowed_order) ? strtoupper($order) : 'ASC';
+        $order = in_array(strtoupper($order), $allowed_order, true) ? strtoupper($order) : 'ASC';
 
         // Handle sorting
         $orderby = esc_sql($orderby);
@@ -246,66 +246,76 @@ class Quick_Web_Notes_Admin
         $allowed_order = array('ASC', 'DESC');
 
         // Sanitize orderby
-        $orderby = in_array($orderby, $allowed_orderby) ? $orderby : 'created_at';
+        $orderby = in_array($orderby, $allowed_orderby, true) ? $orderby : 'created_at';
+        $orderby = esc_sql($orderby);  // Additional escaping for the column name
 
         // Sanitize order
-        $order = in_array(strtoupper($order), $allowed_order) ? strtoupper($order) : 'ASC';
+        $order = in_array(strtoupper($order), $allowed_order, true) ? strtoupper($order) : 'DESC';
 
-        // Use $wpdb->prepare with a placeholder that won't be escaped
-        $sql = $wpdb->prepare(
-            "SELECT * FROM $this->table_name ORDER BY `%1s` %2s",
-            $orderby,
-            $order
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}quick_web_notes ORDER BY %s %s",
+                $orderby,
+                $order
+            )
         );
-
-        // Get all notes
-        return $wpdb->get_results($sql);
     }
-
     public function process_bulk_actions()
     {
-        // Only process if we're on our plugin page and have a bulk action
+        // Check if we're on the correct page
         if (!isset($_POST['page']) || $_POST['page'] !== 'quick-web-notes-manager') {
             return;
         }
 
-        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'bulk-notes')) {
+        // Verify nonce
+        if (
+            !isset($_POST['_wpnonce']) || !wp_verify_nonce(
+                sanitize_text_field(wp_unslash($_POST['_wpnonce'])),
+                'bulk-notes'
+            )
+        ) {
             return;
         }
 
+        // Get the action
         $action = '-1';
         if (isset($_POST['action']) && $_POST['action'] !== '-1') {
-            $action = $_POST['action'];
+            $action = sanitize_text_field(wp_unslash($_POST['action']));
         } elseif (isset($_POST['action2']) && $_POST['action2'] !== '-1') {
-            $action = $_POST['action2'];
+            $action = sanitize_text_field(wp_unslash($_POST['action2']));
         }
 
+        // Process bulk delete
         if ($action === 'bulk-delete' && isset($_POST['note_ids']) && is_array($_POST['note_ids'])) {
-            $ids = array_map('intval', $_POST['note_ids']);
+            global $wpdb;
+
+            // Sanitize and validate IDs
+            $ids = array_map('absint', wp_unslash($_POST['note_ids']));
+            $ids = array_filter($ids); // Remove any zero values
 
             if (!empty($ids)) {
-                $placeholders = array_fill(0, count($ids), '%d');
-                $placeholder_string = implode(',', $placeholders);
+                $table_name = $wpdb->prefix . 'quick_web_notes';
 
-                // Escape table name
-                $table = esc_sql($this->table_name);
+                // Build IN clause with proper number of placeholders
+                $placeholders = implode(',', array_fill(0, count($ids), '%d'));
 
-                // Prepare and execute the query
-                $query = $this->wpdb->prepare(
-                    "DELETE FROM {$table} WHERE id IN ($placeholder_string)",
-                    $ids
+                // Build and execute the delete query
+                $wpdb->query(
+                    $wpdb->prepare(
+                        "DELETE FROM $table_name WHERE id IN ($placeholders)",
+                        $ids
+                    )
                 );
-                $result = $this->wpdb->query($query);
 
                 // Store result in transient
                 set_transient('quick_web_notes_bulk_delete_result', [
-                    'status' => $result ? 'success' : 'error',
-                    'count' => $result
+                    'status' => $wpdb->rows_affected ? 'success' : 'error',
+                    'count' => $wpdb->rows_affected
                 ], 30);
 
                 // Redirect back to the admin page
                 wp_safe_redirect(add_query_arg(
-                    array('page' => 'quick-web-notes-manager'),
+                    ['page' => 'quick-web-notes-manager'],
                     admin_url('admin.php')
                 ));
                 exit;
@@ -353,10 +363,22 @@ class Quick_Web_Notes_Admin
     {
         check_ajax_referer('quick-web-notes-admin-nonce', 'nonce');
 
-        $id = intval($_POST['id']);
-        $title = sanitize_text_field($_POST['title']);
-        $content = sanitize_textarea_field($_POST['content']);
+        // Validate and sanitize id
+        $id = isset($_POST['id']) ? absint($_POST['id']) : 0;
 
+        // Validate and sanitize title
+        $title = '';
+        if (isset($_POST['title'])) {
+            $title = sanitize_text_field(wp_unslash($_POST['title']));
+        }
+
+        // Validate and sanitize content
+        $content = '';
+        if (isset($_POST['content'])) {
+            $content = sanitize_textarea_field(wp_unslash($_POST['content']));
+        }
+
+        // Check if at least one field is filled
         if (empty($title) && empty($content)) {
             wp_send_json_error('Title or Content is required');
             return;
