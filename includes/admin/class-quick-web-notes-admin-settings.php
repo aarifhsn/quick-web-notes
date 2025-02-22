@@ -2,8 +2,9 @@
 
 class Quick_Web_Notes_Admin_Settings
 {
-    private $options_group = 'notes_manager_options';
+    private $options_group = 'quick_web_notes_options';
     private $options_name = 'quick_web_notes_settings';
+    private $page_name = 'quick-web-notes-settings';
 
     public function __construct()
     {
@@ -46,63 +47,59 @@ class Quick_Web_Notes_Admin_Settings
 
     public function register_settings()
     {
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
         register_setting(
             $this->options_group,
             $this->options_name,
-            array($this, 'sanitize_settings')
+            [
+                'type' => 'array',
+                'sanitize_callback' => array($this, 'sanitize_settings'),
+                'show_in_rest' => false,
+                'default' => [
+                    'vertical_position' => 'bottom',
+                    'horizontal_position' => 'right',
+                    'vertical_offset' => 20,
+                    'horizontal_offset' => 30,
+                    'z_index' => 9998
+                ]
+            ]
         );
+
+
 
         add_settings_section(
             'position_section',
             'Icon Position Settings',
             array($this, 'position_section_callback'),
-            'notes_manager_settings'
+            $this->page_name
         );
 
-        // Vertical Position (top/bottom)
-        add_settings_field(
-            'vertical_position',
-            'Vertical Position',
-            array($this, 'vertical_position_callback'),
-            'notes_manager_settings',
-            'position_section'
-        );
+        // Settings Fields
+        $this->add_settings_fields();
+    }
 
-        // Vertical Offset
-        add_settings_field(
-            'vertical_offset',
-            'Vertical Offset (px)',
-            array($this, 'vertical_offset_callback'),
-            'notes_manager_settings',
-            'position_section'
-        );
+    public function add_settings_fields()
+    {
+        $fields = [
+            'vertical_position' => 'Vertical Position',
+            'vertical_offset' => 'Vertical Offset (px)',
+            'horizontal_position' => 'Horizontal Position',
+            'horizontal_offset' => 'Horizontal Offset (px)',
+            'z_index' => 'Z-Index'
+        ];
 
-        // Horizontal Position (left/right)
-        add_settings_field(
-            'horizontal_position',
-            'Horizontal Position',
-            array($this, 'horizontal_position_callback'),
-            'notes_manager_settings',
-            'position_section'
-        );
-
-        // Horizontal Offset
-        add_settings_field(
-            'horizontal_offset',
-            'Horizontal Offset (px)',
-            array($this, 'horizontal_offset_callback'),
-            'notes_manager_settings',
-            'position_section'
-        );
-
-        // Z-index
-        add_settings_field(
-            'z_index',
-            'Z-Index',
-            array($this, 'z_index_callback'),
-            'notes_manager_settings',
-            'position_section'
-        );
+        foreach ($fields as $key => $label) {
+            add_settings_field(
+                $key,
+                $label,
+                array($this, $key . '_callback'),
+                $this->page_name,
+                'position_section'
+            );
+        }
     }
 
     public function render_settings_page()
@@ -110,6 +107,9 @@ class Quick_Web_Notes_Admin_Settings
         if (!current_user_can('manage_options')) {
             return;
         }
+        wp_nonce_field('quick_web_notes_settings_action', 'quick_web_notes_settings_nonce');
+
+        $options = get_option($this->options_name);
         ?>
 
         <div class="wrap">
@@ -118,7 +118,7 @@ class Quick_Web_Notes_Admin_Settings
                 <form method="post" action="options.php">
                     <?php
                     settings_fields($this->options_group);
-                    do_settings_sections('notes_manager_settings');
+                    do_settings_sections($this->page_name);
                     submit_button();
                     ?>
                 </form>
@@ -151,6 +151,7 @@ class Quick_Web_Notes_Admin_Settings
                     });
                 }
 
+                // Bind events and initial update
                 $('select, input').on('change input', updatePreview);
                 updatePreview();
             });
@@ -220,16 +221,33 @@ class Quick_Web_Notes_Admin_Settings
 
     public function sanitize_settings($input)
     {
-        $sanitized = array();
+        // If input is not an array, return defaults
+        if (!is_array($input)) {
+            return [
+                'vertical_position' => 'bottom',
+                'horizontal_position' => 'right',
+                'vertical_offset' => 20,
+                'horizontal_offset' => 30,
+                'z_index' => 9998
+            ];
+        }
 
-        $sanitized['vertical_position'] = sanitize_text_field($input['vertical_position']);
-        $sanitized['vertical_offset'] = absint($input['vertical_offset']);
-        $sanitized['horizontal_position'] = sanitize_text_field($input['horizontal_position']);
-        $sanitized['horizontal_offset'] = absint($input['horizontal_offset']);
-        $sanitized['z_index'] = absint($input['z_index']);
+        $sanitized = [];
+
+        $sanitized['vertical_position'] = isset($input['vertical_position']) && in_array($input['vertical_position'], array('top', 'bottom'), true) ? $input['vertical_position'] : 'bottom';
+
+        $sanitized['horizontal_position'] = isset($input['horizontal_position']) && in_array($input['horizontal_position'], array('left', 'right'), true) ? $input['horizontal_position'] : 'right';
+
+        // Offsets
+        $sanitized['vertical_offset'] = isset($input['vertical_offset']) ?
+            absint($input['vertical_offset']) : 20;
+        $sanitized['horizontal_offset'] = isset($input['horizontal_offset']) ?
+            absint($input['horizontal_offset']) : 30;
+
+        $sanitized['z_index'] = isset($input['z_index']) && is_numeric($input['z_index']) ? $input['z_index'] : 9998; // Default 9998
 
         // Clear transient cache
-        delete_transient('simple_notes_position_css');
+        delete_transient('quick_web_notes_position_css');
 
         return $sanitized;
     }

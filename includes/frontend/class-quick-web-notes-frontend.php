@@ -98,8 +98,9 @@ class Quick_Web_Notes_Frontend
         ?>
         <!-- Fixed Button -->
         <div id="simple-notes-fixed-btn" class="simple-notes-fixed-button note-button">
-            <button class="button"><img src="<?php echo esc_url(plugins_url('../../assets/icons/note.png', __FILE__)); ?>"
-                    alt="Note Icon"></button>
+            <button class="button" aria-label="<?php esc_attr_e('Notes', 'quick-web-notes'); ?>">
+                <span class="screen-reader-text"><?php esc_html_e('Notes', 'quick-web-notes'); ?></span>
+            </button>
         </div>
 
         <!-- Notes Modal -->
@@ -194,8 +195,9 @@ class Quick_Web_Notes_Frontend
 
     private function get_all_notes()
     {
+        $table_name = esc_sql($this->table_name);
         return $this->wpdb->get_results(
-            "SELECT * FROM {$this->table_name} ORDER BY created_at DESC"
+            "SELECT * FROM {$table_name} ORDER BY created_at DESC"
         );
     }
 }

@@ -6,18 +6,21 @@ jQuery(document).ready(function ($) {
     const contentSpan = row.find(".note-content");
 
     // Store original values
-    const originalTitle = titleSpan.text();
-    const originalContent = contentSpan.text();
+    const originalTitle = titleSpan.text().trim();
+    const originalContent = contentSpan.text().trim();
 
     // Create input fields
     titleSpan.html(
       `<input type="text" class="regular-text" value="${originalTitle.replace(
         /"/g,
         "&quot;"
-      )}">`
+      )}" data-original="${originalTitle.replace(/"/g, "&quot;")}">`
     );
     contentSpan.html(
-      `<textarea class="large-text" rows="3">${originalContent}</textarea>`
+      `<textarea class="large-text" rows="3" data-original="${originalContent.replace(
+        /"/g,
+        "&quot;"
+      )}">${originalContent}</textarea>`
     );
 
     // Change button to Save and add Cancel
@@ -42,7 +45,7 @@ jQuery(document).ready(function ($) {
     const originalContent = contentSpan.find("textarea").data("original");
 
     // Restore text content
-    titleSpan.text(originalTitle);
+    titleSpan.html(`<strong>${originalTitle}</strong>`);
     contentSpan.text(originalContent);
 
     // Restore edit button
@@ -66,17 +69,17 @@ jQuery(document).ready(function ($) {
     const content = contentTextarea.val();
 
     // Validate fields
-    if (!title || !content) {
-      alert("Both title and content are required!");
+    if (!title) {
+      alert("Please fill the required field");
       return;
     }
 
     $.ajax({
-      url: simpleNotesAdmin.ajaxurl,
+      url: quickWebNotesAdmin.ajaxurl,
       type: "POST",
       data: {
         action: "admin_edit_note",
-        nonce: simpleNotesAdmin.nonce,
+        nonce: quickWebNotesAdmin.nonce,
         id: id,
         title: title,
         content: content,
@@ -128,14 +131,21 @@ jQuery(document).ready(function ($) {
     $("#cb-select-all-1").prop("checked", $(this).prop("checked"));
   });
 
-  // when clicked the button, show the form
+  // First, ensure the form is hidden on page load
+  $(".admin_add_new_note_form").hide();
 
-  $(".admin_add_new_note_form").hide(); // Hide form initially
-
-  $(".admin_add_new_note_button").click(function () {
-    $(".admin_add_new_note_form").show(300);
+  // Button click handlers with error checking
+  $(document).on("click", ".admin_add_new_note_button", function () {
+    const $form = $(".admin_add_new_note_form");
+    if ($form.length) {
+      $form.show(300);
+    }
   });
-  $(".admin_add_new_note_close_button").click(function () {
-    $(".admin_add_new_note_form").hide(300);
+
+  $(document).on("click", ".admin_add_new_note_close_button", function () {
+    const $form = $(".admin_add_new_note_form");
+    if ($form.length) {
+      $form.hide(300);
+    }
   });
 });

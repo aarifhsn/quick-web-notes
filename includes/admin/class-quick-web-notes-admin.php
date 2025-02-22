@@ -1,4 +1,14 @@
 <?php
+/**
+ * Get all notes with proper preparation and caching
+ * 
+ * @param string $orderby Column to order by
+ * @param string $order Order direction
+ * @return array Array of note objects
+ * 
+ * @phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+ * @phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+ */
 class Quick_Web_Notes_Admin
 {
     private $wpdb;
@@ -57,9 +67,22 @@ class Quick_Web_Notes_Admin
     }
 
 
-    public function render_admin_page($orderby = 'created_at', $order = 'DESC')
+    public function render_admin_page()
     {
         $this->handle_note_edit();
+
+        // Create nonce for sorting
+        $sort_nonce = wp_create_nonce('quick_web_notes_sort');
+
+        // Check if the nonce is set and valid before processing GET parameters
+        if (isset($_GET['_wpnonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'quick_web_notes_sort')) {
+            $orderby = isset($_GET['orderby']) ? sanitize_text_field(wp_unslash($_GET['orderby'])) : 'created_at';
+            $order = isset($_GET['order']) ? sanitize_text_field(wp_unslash($_GET['order'])) : 'DESC';
+        } else {
+            // If nonce verification fails, use default values
+            $orderby = 'created_at';
+            $order = 'DESC';
+        }
 
         // Allowed order by columns to prevent SQL injection
         $allowed_orderby = array('title', 'content', 'created_at');
@@ -205,6 +228,11 @@ class Quick_Web_Notes_Admin
 
     public function process_note_deletion()
     {
+        // Check if user has permission
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html_e('You are not allowed to perform this action', 'quick-web-notes'));
+        }
+
         // Check if this is a delete action
         if (!isset($_GET['action']) || $_GET['action'] !== 'delete' || !isset($_GET['id'])) {
             return;
@@ -221,45 +249,75 @@ class Quick_Web_Notes_Admin
             !isset($_GET['delete_nonce']) ||
             !wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['delete_nonce'])), 'delete_note_' . $note_id)
         ) {
-            wp_die('Security check failed');
+            wp_die(esc_html_e('Security check failed', 'quick-web-notes'));
         }
 
         // Delete the note
         $result = $this->wpdb->delete(
             $this->table_name,
-            array('id' => $note_id)
+            array('id' => $note_id),
+            array('%d')
         );
 
         // Set result message
         set_transient('quick_web_notes_message', [
             'type' => $result ? 'success' : 'error',
-            'message' => $result ? 'Note deleted successfully!' : 'Failed to delete note. Please try again.'
+            'message' => $result !== false ?
+                __('Note deleted successfully!', 'quick-web-notes') :
+                __('Failed to delete note. Please try again.', 'quick-web-notes')
         ], 30);
+
+        // Redirect back to notes manager page
+        // Redirect back to the notes page
+        wp_safe_redirect(
+            add_query_arg(
+                ['page' => 'quick-web-notes-manager'],
+                admin_url('admin.php')
+            )
+        );
+        exit;
     }
 
     private function get_all_notes($orderby = 'created_at', $order = 'DESC')
     {
         global $wpdb;
 
-        // Allowed order by columns to prevent SQL injection
-        $allowed_orderby = array('title', 'content', 'created_at');
-        $allowed_order = array('ASC', 'DESC');
+        // Allowed columns to prevent SQL injection
+        $allowed_orderby = ['title', 'content', 'created_at'];
+        $allowed_order = ['ASC', 'DESC'];
 
-        // Sanitize orderby
+        // Validate and sanitize ORDER BY column
         $orderby = in_array($orderby, $allowed_orderby, true) ? $orderby : 'created_at';
-        $orderby = esc_sql($orderby);  // Additional escaping for the column name
 
-        // Sanitize order
+        // Validate and sanitize ORDER direction
         $order = in_array(strtoupper($order), $allowed_order, true) ? strtoupper($order) : 'DESC';
 
-        return $wpdb->get_results(
-            $wpdb->prepare(
-                "SELECT * FROM {$wpdb->prefix}quick_web_notes ORDER BY %s %s",
-                $orderby,
-                $order
-            )
-        );
+        // Cache key for caching results
+        $cache_key = "quick_web_notes_{$orderby}_{$order}";
+        $notes = wp_cache_get($cache_key, 'quick_web_notes');
+
+        if (false === $notes) {
+            $table_name = $wpdb->prefix . 'quick_web_notes';
+
+            // Create the base query with a placeholder for the table name
+            $query = "SELECT * FROM `" . esc_sql($table_name) . "`";
+
+            // Add the ORDER BY clause using esc_sql for the column name and order direction
+            // since prepare() can't be used for column names
+            $query .= " ORDER BY " . esc_sql($orderby) . " " . esc_sql($order);
+
+            // Since we're not using any user input values that need to be prepared,
+            // we can use get_results directly with our escaped query
+            $notes = $wpdb->get_results($query);
+
+            // Store results in cache
+            wp_cache_set($cache_key, $notes, 'quick_web_notes', HOUR_IN_SECONDS);
+        }
+
+        return $notes;
     }
+
+
     public function process_bulk_actions()
     {
         // Check if we're on the correct page
@@ -274,7 +332,7 @@ class Quick_Web_Notes_Admin
                 'bulk-notes'
             )
         ) {
-            return;
+            wp_die('Security check failed');
         }
 
         // Get the action
@@ -294,23 +352,48 @@ class Quick_Web_Notes_Admin
             $ids = array_filter($ids); // Remove any zero values
 
             if (!empty($ids)) {
+                global $wpdb;
                 $table_name = $wpdb->prefix . 'quick_web_notes';
 
-                // Build IN clause with proper number of placeholders
-                $placeholders = implode(',', array_fill(0, count($ids), '%d'));
+                // Cache key for bulk operations
+                $cache_key = 'quick_web_notes_bulk_operation';
+                $notes_cache_group = 'quick_web_notes';
 
-                // Build and execute the delete query
-                $wpdb->query(
+                // Delete individual note caches
+                foreach ($ids as $note_id) {
+                    wp_cache_delete($note_id, $notes_cache_group);
+                }
+
+                // Delete any bulk listing caches
+                wp_cache_delete('all_notes', $notes_cache_group);
+                wp_cache_delete($cache_key, $notes_cache_group);
+
+                // Execute the properly prepared query directly
+                $affected_rows = $wpdb->query(
                     $wpdb->prepare(
-                        "DELETE FROM $table_name WHERE id IN ($placeholders)",
+                        "DELETE FROM `" . esc_sql($table_name) . "` WHERE id IN (" .
+                        implode(',', array_fill(0, count($ids), '%d')) .
+                        ")",
                         $ids
                     )
                 );
 
-                // Store result in transient
+                // Cache the operation result briefly to prevent duplicate operations
+                wp_cache_set(
+                    $cache_key,
+                    [
+                        'status' => $affected_rows ? 'success' : 'error',
+                        'count' => $affected_rows,
+                        'timestamp' => time()
+                    ],
+                    $notes_cache_group,
+                    30
+                );
+
+                // Store result in transient (for UI feedback)
                 set_transient('quick_web_notes_bulk_delete_result', [
-                    'status' => $wpdb->rows_affected ? 'success' : 'error',
-                    'count' => $wpdb->rows_affected
+                    'status' => $affected_rows ? 'success' : 'error',
+                    'count' => $affected_rows
                 ], 30);
 
                 // Redirect back to the admin page
@@ -329,8 +412,9 @@ class Quick_Web_Notes_Admin
         if ($result) {
             if ($result['status'] === 'success') {
                 $count = $result['count'];
-                /* translators: %s: number of notes deleted */
+
                 $message = sprintf(
+                    // translators: %s: number of notes deleted
                     _n(
                         '%s note deleted successfully.',
                         '%s notes deleted successfully.',

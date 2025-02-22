@@ -4,13 +4,12 @@
  * Plugin URI:        https://github.com/aarifhsn/quick-web-notes
  * Description:       Quick Web Notes Daily is a user-friendly WordPress plugin that helps you capture and manage your daily ideas effortlessly. Add notes directly from the frontend or use the comprehensive dashboard. Never lose track of your thoughts with easy editing, organizing, and deletion features.
  * Version:           1.0.0
- * Requires at least: 6.0
+ * Requires at least: 6.2
  * Requires PHP:      7.2
  * Author:            Arif Hassan
  * Author URI:        https://mountaivary.com/
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Update URI:        https://mountaivary.com/my-plugin/
  * Text Domain:       quick-web-notes
  * Domain Path:       /languages
  */

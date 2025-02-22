@@ -34,10 +34,10 @@ class Quick_Web_Notes
 		$this->set_locale();
 		$this->define_settings_hooks();
 
-		$notes_service = new Quick_Web_Notes_Service($wpdb, $this->table_name);
+		// $notes_service = new Quick_Web_Notes_Service($wpdb, $this->table_name);
 		$admin = new Quick_Web_Notes_Admin($wpdb, $this->table_name);
 		$frontend = new Quick_Web_Notes_Frontend();
-		$ajax = new Quick_Web_Notes_Ajax($notes_service);
+		$ajax = new Quick_Web_Notes_Ajax();
 
 	}
 
@@ -57,7 +57,7 @@ class Quick_Web_Notes
 
 		require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/class-quick-web-notes-settings-page.php';
 
-		require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/services/class-quick-web-notes-service.php';
+		// require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/services/class-quick-web-notes-service.php';
 
 		require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/admin/class-quick-web-notes-admin.php';
 
