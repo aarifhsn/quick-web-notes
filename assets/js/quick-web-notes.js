@@ -1,16 +1,4 @@
 jQuery(document).ready(function ($) {
-  // Toggle notes in shortcode
-  $("#toggleNotes").on("click", function () {
-    var $content = $("#notesContent");
-    if ($content.is(":hidden")) {
-      $content.slideDown();
-      $(this).text("Hide Notes");
-    } else {
-      $content.slideUp();
-      $(this).text("Show Notes");
-    }
-  });
-
   // Show/hide action menu
   $(document).on("click", ".action_icon", function (event) {
     event.stopPropagation();
@@ -101,7 +89,7 @@ jQuery(document).ready(function ($) {
           notes.forEach(function (note) {
             html += `
               <div class="note-item" data-id="${note.id}">
-                  <h3 class="note_tile_container">${note.title}
+                  <h3 class="note_title_container">${note.title}
                     <div class="action_list_wrapper">
                       <button class="action_icon">&#8942;</button>
                       <div class="action_list_container">

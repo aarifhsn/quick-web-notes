@@ -1,15 +1,28 @@
 <?php
 
+/**
+ * The plugin bootstrap file
+ *
+ * This file is read by WordPress to generate the plugin information in the plugin
+ * admin area. This file also includes all of the dependencies used by the plugin,
+ * registers the activation and deactivation functions, and defines a function
+ * that starts the plugin.
+ *
+ * @link              https://github.com/aarifhsn/quick-web-notes/
+ * @since             1.0.0
+ * @package           Quick_Web_Notes
+ */
+
 class Quick_Web_Notes
 {
 	protected $quick_web_notes;
 
 	/**
-	 * The current version of the plugin.
+	 * The ID of this plugin.
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      string    $version    The current version of the plugin.
+	 * @var      string    $version 
 	 */
 	protected $version;
 
@@ -25,14 +38,14 @@ class Quick_Web_Notes
 		$this->quick_web_notes = 'quick-web-notes';
 		$this->version = QUICK_WEB_NOTES_VERSION;
 
-		$this->load_dependencies();
+		$this->qwn_load_dependencies();
 
 		// Initialize Database tables
 		$db = new Quick_Web_Notes_DB();
-		$db->create_tables();
+		$db->qwn_create_tables();
 
-		$this->set_locale();
-		$this->define_settings_hooks();
+		$this->qwn_set_locale();
+		$this->define_qwn_settings_hooks();
 
 		// $notes_service = new Quick_Web_Notes_Service($wpdb, $this->table_name);
 		$admin = new Quick_Web_Notes_Admin($wpdb, $this->table_name);
@@ -41,7 +54,25 @@ class Quick_Web_Notes
 
 	}
 
-	private function load_dependencies()
+	/**
+	 * Load the required dependencies for this plugin.
+	 *
+	 * Include the following files that make up the plugin:
+	 *
+	 * - Quick_Web_Notes_DB. Defines the custom database table.
+	 * - Quick_Web_Notes_i18n. Defines internationalization functionality.
+	 * - Quick_Web_Notes_Settings_Page. Defines all hooks for the settings page.
+	 * - Quick_Web_Notes_Admin. Defines all hooks for the admin area.
+	 * - Quick_Web_Notes_Frontend. Defines all hooks for the frontend area.
+	 * - Quick_Web_Notes_Ajax. Defines all hooks for the ajax area.
+	 *
+	 * Create an instance of the loader which will be used to register the hooks
+	 * with WordPress.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function qwn_load_dependencies()
 	{
 		/**
 		 * Load required files here
@@ -57,16 +88,11 @@ class Quick_Web_Notes
 
 		require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/class-quick-web-notes-settings-page.php';
 
-		// require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/services/class-quick-web-notes-service.php';
-
 		require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/admin/class-quick-web-notes-admin.php';
 
 		require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/frontend/class-quick-web-notes-frontend.php';
 
 		require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/ajax/class-quick-web-notes-ajax.php';
-
-
-
 	}
 
 	/**
@@ -78,14 +104,14 @@ class Quick_Web_Notes
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function set_locale()
+	private function qwn_set_locale()
 	{
 
 		$plugin_i18n = new quick_web_notes_i18n();
 
-		$plugin_i18n->set_domain($this->quick_web_notes);
+		$plugin_i18n->qwn_set_domain($this->quick_web_notes);
 
-		$plugin_i18n->load_plugin_textdomain();
+		$plugin_i18n->qwn_load_plugin_textdomain();
 
 	}
 
@@ -96,11 +122,9 @@ class Quick_Web_Notes
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_settings_hooks()
+	private function define_qwn_settings_hooks()
 	{
-
 		new Quick_Web_Notes_Settings_Page();
-
 	}
 
 }

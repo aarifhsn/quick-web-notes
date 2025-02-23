@@ -24,24 +24,36 @@ class Quick_Web_Notes_Ajax
         $this->table_name = $wpdb->prefix . 'quick_web_notes';
 
         // $this->notes_service = $notes_service;
-        $this->init_hooks();
+        $this->qwn_init_hooks();
     }
 
-    private function init_hooks()
+    /**
+     * Initialize hooks for the ajax area.
+     *
+     * @since    1.0.0
+     */
+    private function qwn_init_hooks()
     {
         // Public Actions
-        add_action('wp_ajax_add_note', array($this, 'ajax_add_note'));
-        add_action('wp_ajax_nopriv_add_note', array($this, 'ajax_add_note'));
-        add_action('wp_ajax_get_notes', array($this, 'ajax_get_notes'));
-        add_action('wp_ajax_nopriv_get_notes', array($this, 'ajax_get_notes'));
+        add_action('wp_ajax_add_note', array($this, 'qwn_ajax_add_note'));
+        add_action('wp_ajax_nopriv_add_note', array($this, 'qwn_ajax_add_note'));
+        add_action('wp_ajax_get_notes', array($this, 'qwn_ajax_get_notes'));
+        add_action('wp_ajax_nopriv_get_notes', array($this, 'qwn_ajax_get_notes'));
 
         // Admin Actions
-        add_action('wp_ajax_edit_note', array($this, 'ajax_edit_note'));
-        add_action('wp_ajax_delete_note', array($this, 'ajax_delete_note'));
-        add_action('wp_ajax_get_note_by_id', array($this, 'ajax_get_note_by_id'));
+        add_action('wp_ajax_edit_note', array($this, 'qwn_ajax_edit_note'));
+        add_action('wp_ajax_delete_note', array($this, 'qwn_ajax_delete_note'));
+        add_action('wp_ajax_get_note_by_id', array($this, 'qwn_ajax_get_note_by_id'));
     }
 
-    private function validate_title_content($title, $content)
+    /**
+     * Validate title and content
+     *
+     * @param string $title
+     * @param string $content
+     * @return bool
+     */
+    private function qwn_validate_title_content($title, $content)
     {
         if (empty($title) && !empty($content)) {
             wp_send_json_error('Title is required');
@@ -50,14 +62,19 @@ class Quick_Web_Notes_Ajax
         return true;
     }
 
-    public function ajax_add_note()
+    /**
+     * Add a new note
+     *
+     * @since 1.0.0
+     */
+    public function qwn_ajax_add_note()
     {
         check_ajax_referer('quick-web-notes-nonce', 'nonce');
 
         $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
         $content = isset($_POST['content']) ? sanitize_textarea_field(wp_unslash($_POST['content'])) : '';
 
-        if (!$this->validate_title_content($title, $content)) {
+        if (!$this->qwn_validate_title_content($title, $content)) {
             return;
         }
 
@@ -82,7 +99,12 @@ class Quick_Web_Notes_Ajax
         }
     }
 
-    public function ajax_get_notes()
+    /**
+     * Get all notes
+     *
+     * @since 1.0.0
+     */
+    public function qwn_ajax_get_notes()
     {
         global $wpdb;
         check_ajax_referer('quick-web-notes-nonce', 'nonce');
@@ -91,10 +113,12 @@ class Quick_Web_Notes_Ajax
         $notes = wp_cache_get($cache_key, 'quick-web-notes');
 
         if (false === $notes) {
+
+            $table_name = $wpdb->prefix . 'quick_web_notes';
+
+            // Remove wpdb::prepare since there are no variables to escape
             $notes = $wpdb->get_results(
-                $wpdb->prepare(
-                    "SELECT * FROM {$wpdb->prefix}quick_web_notes ORDER BY created_at DESC"
-                )
+                "SELECT * FROM {$table_name} ORDER BY created_at DESC"
             );
 
             if ($notes) {
@@ -105,7 +129,12 @@ class Quick_Web_Notes_Ajax
         wp_send_json_success($notes);
     }
 
-    public function ajax_edit_note()
+    /**
+     * Edit a note
+     *
+     * @since 1.0.0
+     */
+    public function qwn_ajax_edit_note()
     {
         check_ajax_referer('quick-web-notes-nonce', 'nonce');
 
@@ -123,7 +152,7 @@ class Quick_Web_Notes_Ajax
         $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
         $content = isset($_POST['content']) ? sanitize_textarea_field(wp_unslash($_POST['content'])) : '';
 
-        if (!$this->validate_title_content($title, $content)) {
+        if (!$this->qwn_validate_title_content($title, $content)) {
             return;
         }
 
@@ -147,7 +176,12 @@ class Quick_Web_Notes_Ajax
         }
     }
 
-    public function ajax_get_note_by_id()
+    /**
+     * Get a note by ID
+     *
+     * @since 1.0.0
+     */
+    public function qwn_ajax_get_note_by_id()
     {
         global $wpdb;
         check_ajax_referer('quick-web-notes-nonce', 'nonce');
@@ -186,7 +220,12 @@ class Quick_Web_Notes_Ajax
         }
     }
 
-    public function ajax_delete_note()
+    /**
+     * Delete a note
+     *
+     * @since 1.0.0
+     */
+    public function qwn_ajax_delete_note()
     {
         global $wpdb;
 

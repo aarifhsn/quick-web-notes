@@ -1,4 +1,16 @@
 <?php
+/**
+ * Quick Web Notes Frontend Class
+ * 
+ * This class handles the frontend functionality of the plugin
+ * 
+ * @since 1.0.0
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class Quick_Web_Notes_Frontend
 {
     private $options_name = 'quick_web_notes_settings';
@@ -11,17 +23,27 @@ class Quick_Web_Notes_Frontend
         $this->wpdb = $wpdb;
         $this->table_name = $wpdb->prefix . 'quick_web_notes';
 
-        $this->init_hooks();
+        add_action('init', array($this, 'qwn_init_hooks'));
     }
 
-    private function init_hooks()
+    /**
+     * Initialize hooks for the frontend area.
+     *
+     * @since    1.0.0
+     */
+    public function qwn_init_hooks()
     {
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-        add_action('wp_footer', array($this, 'render_frontend_modal'));
-        add_shortcode('notes', array($this, 'render_frontend_notes'));
+        add_shortcode('web-notes', array($this, 'qwn_render_frontend_notes'));
+        add_action('wp_enqueue_scripts', array($this, 'qwn_enqueue_scripts'));
+        add_action('wp_footer', array($this, 'qwn_render_frontend_modal'));
     }
 
-    public function enqueue_scripts()
+    /**
+     * Enqueue scripts and styles for the frontend area.
+     *
+     * @since    1.0.0
+     */
+    public function qwn_enqueue_scripts()
     {
         wp_enqueue_style(
             'quick-web-notes-style',
@@ -31,7 +53,7 @@ class Quick_Web_Notes_Frontend
         );
 
         // Then add the dynamic positioning CSS
-        $dynamic_css = $this->get_position_css();
+        $dynamic_css = $this->qwn_get_position_css();
         wp_add_inline_style('quick-web-notes-style', $dynamic_css);
 
         wp_enqueue_script(
@@ -52,7 +74,12 @@ class Quick_Web_Notes_Frontend
         );
     }
 
-    private function get_position_css()
+    /**
+     * Get the dynamic CSS for the notes position.
+     *
+     * @since    1.0.0
+     */
+    private function qwn_get_position_css()
     {
         // Try to get cached CSS first
         $cached_css = get_transient('quick_web_notes_position_css');
@@ -61,14 +88,20 @@ class Quick_Web_Notes_Frontend
         }
 
         // Generate new CSS
-        $css = $this->generate_notes_position_css();
+        $css = $this->qwn_generate_notes_position_css();
 
         // Cache the CSS for 12 hours
         set_transient('quick_web_notes_position_css', $css, 12 * HOUR_IN_SECONDS);
 
         return $css;
     }
-    private function generate_notes_position_css()
+
+    /**
+     * Generate the CSS for the notes position.
+     *
+     * @since    1.0.0
+     */
+    private function qwn_generate_notes_position_css()
     {
         $options = get_option($this->options_name);
 
@@ -93,7 +126,12 @@ class Quick_Web_Notes_Frontend
         }";
     }
 
-    public function render_frontend_modal()
+    /**
+     * Render the frontend modal.
+     *
+     * @since    1.0.0
+     */
+    public function qwn_render_frontend_modal()
     {
         ?>
         <!-- Fixed Button -->
@@ -171,29 +209,45 @@ class Quick_Web_Notes_Frontend
         <?php
     }
 
-    public function render_frontend_notes()
+    /**
+     * Render the frontend notes using shortcode.
+     *
+     * @since    1.0.0
+     */
+    public function qwn_render_frontend_notes($atts = [], $content = null)
     {
-        $notes = $this->get_all_notes();
-
+        // Start output buffering
         ob_start();
+
+        $notes = $this->qwn_get_all_notes();
         ?>
         <div class="notes-container">
-            <button id="toggleNotes" class="button">Show Notes</button>
-            <div id="notesContent" style="display: none;">
-                <?php foreach ($notes as $note): ?>
-                    <div class="note-item">
-                        <h3><?php echo esc_html($note->title); ?></h3>
-                        <p><?php echo esc_html($note->content); ?></p>
-                        <small>Created: <?php echo esc_html($note->created_at); ?></small>
-                    </div>
-                <?php endforeach; ?>
+            <div class="notes-content">
+                <?php if (!empty($notes)): ?>
+                    <?php foreach ($notes as $note): ?>
+                        <div class="note-item">
+                            <h3><?php echo esc_html($note->title); ?></h3>
+                            <p><?php echo esc_html($note->content); ?></p>
+                            <small>Created: <?php echo esc_html($note->created_at); ?></small>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p>No notes found.</p>
+                <?php endif; ?>
             </div>
         </div>
         <?php
+
+        // Return the buffered content
         return ob_get_clean();
     }
 
-    private function get_all_notes()
+    /**
+     * Get all notes from the database.
+     *
+     * @since    1.0.0
+     */
+    private function qwn_get_all_notes()
     {
         $table_name = esc_sql($this->table_name);
         return $this->wpdb->get_results(

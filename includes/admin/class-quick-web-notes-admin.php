@@ -9,17 +9,29 @@
  * @phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
  * @phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
  */
+
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly
+}
+
 class Quick_Web_Notes_Admin
 {
     private $wpdb;
     private $table_name;
     private $settings;
 
+    /**
+     * package Quick_Web_Notes_Admin constructor.
+     * @since 1.0.0
+     * @access public
+     * @param $wpdb
+     * @param $table_name
+     */
     public function __construct($wpdb, $table_name)
     {
         $this->wpdb = $wpdb;
         $this->table_name = $table_name;
-        $this->init_hooks();
+        $this->qwn_init_hooks();
 
         // Include the settings class
         require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/admin/class-quick-web-notes-admin-settings.php';
@@ -27,49 +39,63 @@ class Quick_Web_Notes_Admin
 
     }
 
-    private function init_hooks()
+    /**
+     * Initialize hooks for the admin area.
+     *
+     * @since    1.0.0
+     */
+    private function qwn_init_hooks()
     {
-        add_action('admin_menu', array($this, 'register_admin_menu'));
+        add_action('admin_menu', array($this, 'qwn_register_admin_menu'));
 
         // Admin scripts and styles
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+        add_action('admin_enqueue_scripts', array($this, 'qwn_enqueue_admin_assets'));
 
         // Ajax actions
-        add_action('wp_ajax_admin_edit_note', array($this, 'ajax_admin_edit_note'));
+        add_action('wp_ajax_admin_edit_note', array($this, 'qwn_ajax_admin_edit_note'));
 
-        add_action('admin_init', array($this, 'process_bulk_actions'));
-        add_action('admin_init', array($this, 'process_note_submission'));
-        add_action('admin_init', array($this, 'process_note_deletion'));
+        add_action('admin_init', array($this, 'qwn_process_bulk_actions'));
+        add_action('admin_init', array($this, 'qwn_process_note_submission'));
+        add_action('admin_init', array($this, 'qwn_process_note_deletion'));
 
         // Admin notices
-        add_action('admin_notices', array($this, 'admin_notices'));
+        add_action('admin_notices', array($this, 'qwn_admin_notices'));
     }
 
-    public function register_admin_menu()
+    /**
+     * Register the admin menu
+     * 
+     * @since 1.0.0
+     */
+    public function qwn_register_admin_menu()
     {
         add_menu_page(
-            'Notes Manager',
-            'Notes Manager',
+            'Quick Web Notes',
+            'Quick Web Notes',
             'manage_options',
             'quick-web-notes-manager',
-            array($this, 'render_admin_page'),
+            array($this, 'qwn_render_admin_page'),
             'dashicons-sticky'
         );
 
         add_submenu_page(
             'quick-web-notes-manager',
-            'Notes Manager',
+            'Quick Web Notes',
             'Manage Notes',
             'manage_options',
             'quick-web-notes-manager',
-            array($this, 'render_admin_page')
+            array($this, 'qwn_render_admin_page')
         );
     }
 
-
-    public function render_admin_page()
+    /**
+     * Render the admin page
+     * 
+     * @since 1.0.0
+     */
+    public function qwn_render_admin_page()
     {
-        $this->handle_note_edit();
+        $this->qwn_handle_note_edit();
 
         // Create nonce for sorting
         $sort_nonce = wp_create_nonce('quick_web_notes_sort');
@@ -98,18 +124,28 @@ class Quick_Web_Notes_Admin
         $orderby = esc_sql($orderby);
         $order = esc_sql($order);
 
-        $notes = $this->get_all_notes($orderby, $order);
+        $notes = $this->qwn_get_all_notes($orderby, $order);
 
         require_once QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/admin/views/admin-page.php';
     }
 
-
-    public function render_notes_table($notes)
+    /**
+     * Render the notes table
+     * 
+     * @since 1.0.0
+     * @param array $notes Array of note objects
+     */
+    public function qwn_render_notes_table($notes)
     {
         include QUICK_WEB_NOTES_PLUGIN_PATH . 'includes/admin/views/notes-table.php';
     }
 
-    public function process_note_submission()
+    /**
+     * Process note submission
+     * 
+     * @since 1.0.0
+     */
+    public function qwn_process_note_submission()
     {
         // First check if the form was submitted
         if (!isset($_POST['submit_note'])) {
@@ -165,8 +201,12 @@ class Quick_Web_Notes_Admin
         exit;
     }
 
-
-    private function handle_note_edit()
+    /**
+     * Handle note edit
+     * 
+     * @since 1.0.0
+     */
+    private function qwn_handle_note_edit()
     {
         // Check if this is an edit action
         if (!isset($_GET['action']) || $_GET['action'] !== 'edit' || !isset($_GET['id'])) {
@@ -226,7 +266,12 @@ class Quick_Web_Notes_Admin
         ], 30);
     }
 
-    public function process_note_deletion()
+    /**
+     * Process note deletion
+     * 
+     * @since 1.0.0
+     */
+    public function qwn_process_note_deletion()
     {
         // Check if user has permission
         if (!current_user_can('manage_options')) {
@@ -278,7 +323,17 @@ class Quick_Web_Notes_Admin
         exit;
     }
 
-    private function get_all_notes($orderby = 'created_at', $order = 'DESC')
+    /**
+     * Get all notes with proper preparation and caching
+     * 
+     * @param string $orderby Column to order by
+     * @param string $order Order direction
+     * @return array Array of note objects
+     * 
+     * @phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery
+     * @phpcs:disable WordPress.DB.DirectDatabaseQuery.NoCaching
+     */
+    private function qwn_get_all_notes($orderby = 'created_at', $order = 'DESC')
     {
         global $wpdb;
 
@@ -302,12 +357,10 @@ class Quick_Web_Notes_Admin
             // Create the base query with a placeholder for the table name
             $query = "SELECT * FROM `" . esc_sql($table_name) . "`";
 
-            // Add the ORDER BY clause using esc_sql for the column name and order direction
-            // since prepare() can't be used for column names
+            // Add ORDER BY clause
             $query .= " ORDER BY " . esc_sql($orderby) . " " . esc_sql($order);
 
-            // Since we're not using any user input values that need to be prepared,
-            // we can use get_results directly with our escaped query
+            // Execute the query
             $notes = $wpdb->get_results($query);
 
             // Store results in cache
@@ -317,8 +370,12 @@ class Quick_Web_Notes_Admin
         return $notes;
     }
 
-
-    public function process_bulk_actions()
+    /**
+     * Process bulk actions
+     * 
+     * @since 1.0.0
+     */
+    public function qwn_process_bulk_actions()
     {
         // Check if we're on the correct page
         if (!isset($_POST['page']) || $_POST['page'] !== 'quick-web-notes-manager') {
@@ -406,7 +463,12 @@ class Quick_Web_Notes_Admin
         }
     }
 
-    public function admin_notices()
+    /**
+     * Display admin notices
+     * 
+     * @since 1.0.0
+     */
+    public function qwn_admin_notices()
     {
         $result = get_transient('quick_web_notes_bulk_delete_result');
         if ($result) {
@@ -443,7 +505,12 @@ class Quick_Web_Notes_Admin
         }
     }
 
-    public function ajax_admin_edit_note()
+    /**
+     * AJAX: Edit a note
+     * 
+     * @since 1.0.0
+     */
+    public function qwn_ajax_admin_edit_note()
     {
         check_ajax_referer('quick-web-notes-admin-nonce', 'nonce');
 
@@ -484,7 +551,13 @@ class Quick_Web_Notes_Admin
         }
     }
 
-    public function enqueue_admin_assets($hook)
+    /**
+     * Enqueue admin assets
+     * 
+     * @since 1.0.0
+     * @param string $hook The current admin page
+     */
+    public function qwn_enqueue_admin_assets($hook)
     {
 
         // Only load on our plugin's page

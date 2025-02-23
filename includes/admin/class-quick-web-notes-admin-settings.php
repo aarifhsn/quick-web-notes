@@ -1,4 +1,15 @@
 <?php
+/** 
+ * Quick Web Notes Admin Settings Class
+ * 
+ * This class is used to create the settings page for the plugin
+ * 
+ * @since 1.0.0
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 class Quick_Web_Notes_Admin_Settings
 {
@@ -6,19 +17,32 @@ class Quick_Web_Notes_Admin_Settings
     private $options_name = 'quick_web_notes_settings';
     private $page_name = 'quick-web-notes-settings';
 
+    /**
+     * Quick_Web_Notes_Admin_Settings constructor.
+     *
+     * @since 1.0.0
+     * @access public
+     */
     public function __construct()
     {
-        add_action('admin_init', array($this, 'register_settings'));
-        add_action('admin_menu', array($this, 'add_settings_page'));
+        add_action('admin_init', array($this, 'qwn_register_settings'));
+        add_action('admin_menu', array($this, 'qwn_add_settings_page'));
 
         // Admin scripts and styles
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+        add_action('admin_enqueue_scripts', array($this, 'qwn_enqueue_admin_assets'));
     }
 
-    public function enqueue_admin_assets($hook)
+    /**
+     * Enqueue admin assets
+     *
+     * @since 1.0.0
+     * @access public
+     */
+    public function qwn_enqueue_admin_assets($hook)
     {
+
         // Only load on our plugin's settings page
-        if ('notes-manager_page_quick-web-notes-settings' !== $hook) {
+        if ('quick-web-notes_page_quick-web-notes-settings' !== $hook) {
             return;
         }
 
@@ -29,11 +53,15 @@ class Quick_Web_Notes_Admin_Settings
             array(),
             '1.0.0'
         );
-
-
     }
 
-    public function add_settings_page()
+    /**
+     * Add settings page
+     *
+     * @since 1.0.0
+     * @access public
+     */
+    public function qwn_add_settings_page()
     {
         add_submenu_page(
             'quick-web-notes-manager',
@@ -41,11 +69,17 @@ class Quick_Web_Notes_Admin_Settings
             'Settings',
             'manage_options',
             'quick-web-notes-settings',
-            array($this, 'render_settings_page')
+            array($this, 'qwn_render_settings_page')
         );
     }
 
-    public function register_settings()
+    /**
+     * Register settings
+     *
+     * @since 1.0.0
+     * @access public
+     */
+    public function qwn_register_settings()
     {
         if (!current_user_can('manage_options')) {
             return;
@@ -73,15 +107,21 @@ class Quick_Web_Notes_Admin_Settings
         add_settings_section(
             'position_section',
             'Icon Position Settings',
-            array($this, 'position_section_callback'),
+            array($this, 'qwn_position_section_callback'),
             $this->page_name
         );
 
         // Settings Fields
-        $this->add_settings_fields();
+        $this->qwn_add_settings_fields();
     }
 
-    public function add_settings_fields()
+    /**
+     * Add settings fields
+     *
+     * @since 1.0.0
+     * @access public
+     */
+    public function qwn_add_settings_fields()
     {
         $fields = [
             'vertical_position' => 'Vertical Position',
@@ -102,7 +142,13 @@ class Quick_Web_Notes_Admin_Settings
         }
     }
 
-    public function render_settings_page()
+    /**
+     * Render settings page
+     *
+     * @since 1.0.0
+     * @access public
+     */
+    public function qwn_render_settings_page()
     {
         if (!current_user_can('manage_options')) {
             return;
@@ -160,11 +206,19 @@ class Quick_Web_Notes_Admin_Settings
         <?php
     }
 
-    public function position_section_callback()
+    /**
+     * Callbacks for settings fields
+     */
+    public function qwn_position_section_callback()
     {
         echo '<p>Configure the position of your notes icon on the page.</p>';
     }
 
+    /**
+     * Callbacks for settings fields
+     * 
+     * @since 1.0.0
+     */
     public function vertical_position_callback()
     {
         $options = get_option($this->options_name);
@@ -177,6 +231,11 @@ class Quick_Web_Notes_Admin_Settings
         <?php
     }
 
+    /**
+     * Callbacks for settings fields
+     * 
+     * @since 1.0.0
+     */
     public function vertical_offset_callback()
     {
         $options = get_option($this->options_name);
@@ -187,6 +246,11 @@ class Quick_Web_Notes_Admin_Settings
         <?php
     }
 
+    /**
+     * Callbacks for settings fields
+     * 
+     * @since 1.0.0
+     */
     public function horizontal_position_callback()
     {
         $options = get_option($this->options_name);
@@ -199,6 +263,11 @@ class Quick_Web_Notes_Admin_Settings
         <?php
     }
 
+    /**
+     * Callbacks for settings fields
+     * 
+     * @since 1.0.0
+     */
     public function horizontal_offset_callback()
     {
         $options = get_option($this->options_name);
@@ -209,6 +278,11 @@ class Quick_Web_Notes_Admin_Settings
         <?php
     }
 
+    /**
+     * Callbacks for settings fields
+     * 
+     * @since 1.0.0
+     */
     public function z_index_callback()
     {
         $options = get_option($this->options_name);
@@ -219,6 +293,11 @@ class Quick_Web_Notes_Admin_Settings
         <?php
     }
 
+    /**
+     * Sanitize settings
+     * 
+     * @since 1.0.0
+     */
     public function sanitize_settings($input)
     {
         // If input is not an array, return defaults

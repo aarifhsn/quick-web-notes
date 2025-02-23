@@ -22,6 +22,6 @@
 
     <div id="notes-table-container" class="notes_table_container">
         <h2>All Notes</h2>
-        <?php $this->render_notes_table($notes, $orderby, $order); ?>
+        <?php $this->qwn_render_notes_table($notes, $orderby, $order); ?>
     </div>
 </div>

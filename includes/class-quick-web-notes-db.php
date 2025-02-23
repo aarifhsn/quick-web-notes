@@ -1,4 +1,15 @@
 <?php
+/**
+ * Quick Web Notes Database Class
+ * 
+ * This class is used to create the database tables for the plugin
+ * 
+ * @since 1.0.0
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 class Quick_Web_Notes_DB
 {
@@ -9,7 +20,12 @@ class Quick_Web_Notes_DB
         $this->table_name = $wpdb->prefix . 'quick_web_notes';
     }
 
-    public function create_tables()
+    /**
+     * Create the database tables
+     * 
+     * @since 1.0.0
+     */
+    public function qwn_create_tables()
     {
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();

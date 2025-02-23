@@ -19,8 +19,8 @@
   line-height: 1.5;
 }
 .note-item p {
-  margin: 5px 0 0;
-  color: #888;
+  margin: 8px 0 0;
+  color: #444;
   font-size: 16px;
 }
 .note-item small {
@@ -182,9 +182,6 @@ form#simple-notes-add-form p label {
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-/* simple-notes-manager.css */
-/* ... existing styles ... */
-
 .note-actions {
   display: flex;
   justify-content: space-between;
@@ -231,7 +228,7 @@ form#simple-notes-add-form p label {
   z-index: 1;
   padding: 10px 8px;
 }
-.note_tile_container {
+.note_title_container {
   display: flex;
   justify-content: space-between;
 }
