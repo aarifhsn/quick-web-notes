@@ -1,0 +1,262 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+.notes-container {
+  margin: 20px 0;
+}
+
+.note-item {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #f9f9f9;
+}
+
+.note-item h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+}
+.note-item p {
+  margin: 8px 0 0;
+  color: #444;
+  font-size: 16px;
+}
+.note-item small {
+  margin-top: 10px;
+  color: #555;
+  font-size: 12px;
+}
+
+.simple-notes-modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.simple-notes-modal-content {
+  position: relative;
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 20px;
+  width: 400px;
+  border-radius: 8px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.simple-notes-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.simple-notes-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: bold;
+}
+button.simple-notes-close {
+  font-size: 18px;
+}
+#simple-notes-add-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.simple-notes-modal-body {
+  width: 98%;
+}
+
+#simple-notes-edit-form,
+#simple-notes-add-form {
+  button.button.button-primary {
+    background: #007bff;
+    border: none;
+    padding: 8px 12px;
+    color: #fff; /* font-weight: bold; */
+    transition: 0.3s;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+}
+#simple-notes-edit-form,
+#simple-notes-add-form {
+  button.button.button-primary:hover {
+    background: #0269d6;
+    transition: 0.3s;
+  }
+}
+
+form#simple-notes-edit-form,
+form#simple-notes-add-form p label {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.simple-notes-close {
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+.simple-notes-list .note-item {
+  background: #f8f8f8;
+  padding: 15px;
+  margin-top: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.note-item {
+  border: 1px solid #eee;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.required {
+  color: red;
+}
+
+#simple-notes-add-btn {
+  margin-bottom: 20px;
+  margin-top: 15px;
+}
+
+.simple-notes-form input[required],
+.simple-notes-form textarea[required] {
+  border-left: 4px solid #dc3232;
+}
+
+.note-button {
+  border-radius: 50%;
+  background: linear-gradient(145deg, #ffffff, #e6e6e6);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1),
+    -4px -4px 10px rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.note-button:hover {
+  transform: scale(1.1);
+  background: linear-gradient(145deg, #e6e6e6, #ffffff);
+}
+.note-button button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+.note-button img {
+  width: 20px;
+  height: 20px;
+}
+.regular-text,
+.large-text {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.regular-text:focus,
+.large-text:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.note-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.note-actions button {
+  margin-left: 10px;
+}
+.edit-note {
+  margin-bottom: 7px;
+  color: #222;
+}
+.delete-note {
+  color: #b50505;
+}
+.edit-note,
+.delete-note {
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border-color: #051b19;
+  border-radius: 2px;
+  border: 1px solid #ccc;
+  background: #fff;
+  font-weight: bold;
+}
+
+.action_list_wrapper {
+  position: relative;
+}
+.action_list_container {
+  display: none;
+  position: absolute;
+  top: 30px;
+  right: 0px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  padding: 10px 8px;
+}
+.note_title_container {
+  display: flex;
+  justify-content: space-between;
+}
+.action_icon {
+  border: none;
+  background: transparent;
+  font-weight: bold;
+  cursor: pointer;
+  color: #222;
+}
+.simple-notes-fixed-button {
+  padding: 10px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #e1dddd, #e6e6e6);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.1),
+    -4px -4px 10px rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: fixed;
+}
+.simple-notes-fixed-button .button {
+  background-image: url("../icons/note.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  width: 20px;
+  height: 20px;
+}

@@ -1,0 +1,77 @@
+.page_title {
+  margin: 20px 0;
+  font-weight: bold;
+}
+
+.note-title input[type="text"],
+.note-content textarea {
+  width: 100%;
+  margin: 5px 0;
+}
+
+.note-content textarea {
+  min-height: 100px;
+}
+
+.button.cancel-edit-admin {
+  margin-left: 5px;
+}
+
+.wp-list-table .edit-note-admin,
+.wp-list-table .save-note-admin {
+  margin-right: 5px;
+}
+
+.wp-list-table input[type="text"],
+.wp-list-table textarea {
+  width: 100%;
+  margin: 5px 0;
+}
+#add-note-form {
+  max-width: 600px;
+  margin-bottom: 40px;
+}
+
+.admin_add_new_note_form {
+  display: none;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Box shadow */
+  max-width: 500px;
+  margin-top: 15px;
+  position: relative;
+}
+.admin_add_new_note_close_button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: color 0.3s ease-in-out;
+  border-radius: 50%;
+  padding: 7px 11px;
+  border: 1px solid #ddd;
+  font-weight: bold;
+}
+.wrap h2.admin_add_new_note_button {
+  margin-top: 20px;
+}
+.notes_table_container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+.settings_container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  align-items: start;
+}
