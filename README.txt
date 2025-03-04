@@ -1,10 +1,10 @@
 === Quick Web Notes ===
-Contributors: arifhassan
+Contributors: aarifhsn
 Tags: notes, sticky notes, to-do list, reminder, note-taking
 Requires at least: 6.2
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -98,6 +98,12 @@ No, Quick Web Notes is optimized for performance. It loads resources only when n
 5. Frontedn Edit notes interface
 
 == Changelog ==
+
+= 1.0.3 =
+* Minor updates on ownership verification
+
+= 1.0.2 =
+* Minor updates to plugin information (author details and ownership verification).
 
 = 1.0.1 =
 * Fixed: Added user authentication check to ensure frontend icon is only visible to logged-in administrators
