@@ -13,6 +13,9 @@
  * @package           Quick_Web_Notes
  */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
 class Quick_Web_Notes
 {
 	protected $quick_web_notes;
@@ -38,14 +41,14 @@ class Quick_Web_Notes
 		$this->quick_web_notes = 'quick-web-notes';
 		$this->version = QUICK_WEB_NOTES_VERSION;
 
-		$this->qwn_load_dependencies();
+		$this->ahqwn_load_dependencies();
 
 		// Initialize Database tables
 		$db = new Quick_Web_Notes_DB();
-		$db->qwn_create_tables();
+		$db->ahqwn_create_tables();
 
-		$this->qwn_set_locale();
-		$this->define_qwn_settings_hooks();
+		$this->ahqwn_set_locale();
+		$this->ahqwn_define_settings_hooks();
 
 		// $notes_service = new Quick_Web_Notes_Service($wpdb, $this->table_name);
 		$admin = new Quick_Web_Notes_Admin($wpdb, $this->table_name);
@@ -72,7 +75,7 @@ class Quick_Web_Notes
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function qwn_load_dependencies()
+	private function ahqwn_load_dependencies()
 	{
 		/**
 		 * Load required files here
@@ -104,14 +107,12 @@ class Quick_Web_Notes
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function qwn_set_locale()
+	private function ahqwn_set_locale()
 	{
 
 		$plugin_i18n = new quick_web_notes_i18n();
 
-		$plugin_i18n->qwn_set_domain($this->quick_web_notes);
-
-		$plugin_i18n->qwn_load_plugin_textdomain();
+		$plugin_i18n->ahqwn_set_domain($this->quick_web_notes);
 
 	}
 
@@ -122,7 +123,7 @@ class Quick_Web_Notes
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_qwn_settings_hooks()
+	private function ahqwn_define_settings_hooks()
 	{
 		new Quick_Web_Notes_Settings_Page();
 	}

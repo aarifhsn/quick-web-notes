@@ -1,5 +1,8 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
 class Quick_Web_Notes_Settings_Page
 {
     private $wpdb;

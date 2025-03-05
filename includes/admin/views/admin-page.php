@@ -1,3 +1,8 @@
+<?php
+if (!defined('ABSPATH'))
+    exit; // Exit if accessed directly
+?>
+
 <div class="wrap">
 
     <h1 class="page_title">Quick Web Notes</h1>
@@ -22,6 +27,6 @@
 
     <div id="notes-table-container" class="notes_table_container">
         <h2>All Notes</h2>
-        <?php $this->qwn_render_notes_table($notes, $orderby, $order); ?>
+        <?php $this->ahqwn_render_notes_table($notes, $orderby, $order); ?>
     </div>
 </div>

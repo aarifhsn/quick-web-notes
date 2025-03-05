@@ -23,7 +23,7 @@ class Quick_Web_Notes_Frontend
         $this->wpdb = $wpdb;
         $this->table_name = $wpdb->prefix . 'quick_web_notes';
 
-        add_action('init', array($this, 'qwn_init_hooks'));
+        add_action('init', array($this, 'ahqwn_init_hooks'));
     }
 
     /**
@@ -31,11 +31,11 @@ class Quick_Web_Notes_Frontend
      *
      * @since    1.0.0
      */
-    public function qwn_init_hooks()
+    public function ahqwn_init_hooks()
     {
-        add_shortcode('web-notes', array($this, 'qwn_render_frontend_notes'));
-        add_action('wp_enqueue_scripts', array($this, 'qwn_enqueue_scripts'));
-        add_action('wp_footer', array($this, 'qwn_render_frontend_modal'));
+        add_shortcode('ahqwn_notes', array($this, 'ahqwn_render_frontend_notes'));
+        add_action('wp_enqueue_scripts', array($this, 'ahqwn_enqueue_scripts'));
+        add_action('wp_footer', array($this, 'ahqwn_render_frontend_modal'));
     }
 
     /**
@@ -43,7 +43,7 @@ class Quick_Web_Notes_Frontend
      *
      * @since    1.0.0
      */
-    public function qwn_enqueue_scripts()
+    public function ahqwn_enqueue_scripts()
     {
         if (is_user_logged_in() && current_user_can('manage_options')) {
             wp_enqueue_style(
@@ -54,8 +54,8 @@ class Quick_Web_Notes_Frontend
             );
 
             // Then add the dynamic positioning CSS
-            $dynamic_css = $this->qwn_get_position_css();
-            wp_add_inline_style('quick-web-notes-style', $dynamic_css);
+            $dynamic_css = $this->ahqwn_get_position_css();
+            wp_add_inline_style('quick-web-notes-style', esc_html($dynamic_css));
 
             wp_enqueue_script(
                 'quick-web-notes-script',
@@ -81,7 +81,7 @@ class Quick_Web_Notes_Frontend
      *
      * @since    1.0.0
      */
-    private function qwn_get_position_css()
+    private function ahqwn_get_position_css()
     {
         // Try to get cached CSS first
         $cached_css = get_transient('quick_web_notes_position_css');
@@ -90,7 +90,7 @@ class Quick_Web_Notes_Frontend
         }
 
         // Generate new CSS
-        $css = $this->qwn_generate_notes_position_css();
+        $css = $this->ahqwn_generate_notes_position_css();
 
         // Cache the CSS for 12 hours
         set_transient('quick_web_notes_position_css', $css, 12 * HOUR_IN_SECONDS);
@@ -103,7 +103,7 @@ class Quick_Web_Notes_Frontend
      *
      * @since    1.0.0
      */
-    private function qwn_generate_notes_position_css()
+    private function ahqwn_generate_notes_position_css()
     {
         $options = get_option($this->options_name);
 
@@ -121,6 +121,9 @@ class Quick_Web_Notes_Frontend
         // Merge saved options with defaults
         $options = wp_parse_args($options, $defaults);
 
+        // Use esc_url to properly escape the URL
+        $icon_url = esc_url($options['icon_url']);
+
         return "
         .simple-notes-fixed-button {
             position: fixed !important;
@@ -131,7 +134,7 @@ class Quick_Web_Notes_Frontend
         }
             
         .simple-notes-fixed-button .button {
-        background-image: url('{$options['icon_url']}') !important;
+        background-image: url({$icon_url}) !important;
         background-repeat: no-repeat !important;
         background-position: center !important;
         background-size: contain !important;
@@ -148,7 +151,7 @@ class Quick_Web_Notes_Frontend
      *
      * @since    1.0.0
      */
-    public function qwn_render_frontend_modal()
+    public function ahqwn_render_frontend_modal()
     {
         if (is_user_logged_in() && current_user_can('manage_options')) {
             ?>
@@ -233,12 +236,12 @@ class Quick_Web_Notes_Frontend
      *
      * @since    1.0.0
      */
-    public function qwn_render_frontend_notes($atts = [], $content = null)
+    public function ahqwn_render_frontend_notes($atts = [], $content = null)
     {
         // Start output buffering
         ob_start();
 
-        $notes = $this->qwn_get_all_notes();
+        $notes = $this->ahqwn_get_all_notes();
         ?>
         <div class="notes-container">
             <div class="notes-content">
@@ -266,7 +269,7 @@ class Quick_Web_Notes_Frontend
      *
      * @since    1.0.0
      */
-    private function qwn_get_all_notes()
+    private function ahqwn_get_all_notes()
     {
         $table_name = esc_sql($this->table_name);
         return $this->wpdb->get_results(

@@ -25,11 +25,11 @@ class Quick_Web_Notes_Admin_Settings
      */
     public function __construct()
     {
-        add_action('admin_init', array($this, 'qwn_register_settings'));
-        add_action('admin_menu', array($this, 'qwn_add_settings_page'));
+        add_action('admin_init', array($this, 'ahqwn_register_settings'));
+        add_action('admin_menu', array($this, 'ahqwn_add_settings_page'));
 
         // Admin scripts and styles
-        add_action('admin_enqueue_scripts', array($this, 'qwn_enqueue_admin_assets'));
+        add_action('admin_enqueue_scripts', array($this, 'ahqwn_enqueue_admin_assets'));
     }
 
     /**
@@ -38,7 +38,7 @@ class Quick_Web_Notes_Admin_Settings
      * @since 1.0.0
      * @access public
      */
-    public function qwn_enqueue_admin_assets($hook)
+    public function ahqwn_enqueue_admin_assets($hook)
     {
 
         // Only load on our plugin's settings page
@@ -77,7 +77,7 @@ class Quick_Web_Notes_Admin_Settings
      * @since 1.0.0
      * @access public
      */
-    public function qwn_add_settings_page()
+    public function ahqwn_add_settings_page()
     {
         add_submenu_page(
             'quick-web-notes-manager',
@@ -85,7 +85,7 @@ class Quick_Web_Notes_Admin_Settings
             'Settings',
             'manage_options',
             'quick-web-notes-settings',
-            array($this, 'qwn_render_settings_page')
+            array($this, 'ahqwn_render_settings_page')
         );
     }
 
@@ -95,7 +95,7 @@ class Quick_Web_Notes_Admin_Settings
      * @since 1.0.0
      * @access public
      */
-    public function qwn_register_settings()
+    public function ahqwn_register_settings()
     {
         if (!current_user_can('manage_options')) {
             return;
@@ -106,7 +106,7 @@ class Quick_Web_Notes_Admin_Settings
             $this->options_name,
             [
                 'type' => 'array',
-                'sanitize_callback' => array($this, 'sanitize_settings'),
+                'sanitize_callback' => array($this, 'ahqwn_sanitize_settings'),
                 'show_in_rest' => false,
                 'default' => [
                     'vertical_position' => 'bottom',
@@ -125,12 +125,12 @@ class Quick_Web_Notes_Admin_Settings
         add_settings_section(
             'position_section',
             'Icon Position Settings',
-            array($this, 'qwn_position_section_callback'),
+            array($this, 'ahqwn_position_section_callback'),
             $this->page_name
         );
 
         // Settings Fields
-        $this->qwn_add_settings_fields();
+        $this->ahqwn_add_settings_fields();
     }
 
     /**
@@ -139,7 +139,7 @@ class Quick_Web_Notes_Admin_Settings
      * @since 1.0.0
      * @access public
      */
-    public function qwn_add_settings_fields()
+    public function ahqwn_add_settings_fields()
     {
         $fields = [
             'vertical_position' => 'Vertical Position',
@@ -168,7 +168,7 @@ class Quick_Web_Notes_Admin_Settings
      * @since 1.0.0
      * @access public
      */
-    public function qwn_render_settings_page()
+    public function ahqwn_render_settings_page()
     {
         if (!current_user_can('manage_options')) {
             return;
@@ -201,76 +201,13 @@ class Quick_Web_Notes_Admin_Settings
             </div>
         </div>
 
-        <script type="text/javascript">
-            jQuery(document).ready(function ($) {
-                // Initialize color picker
-                $('.color-field').wpColorPicker({
-                    change: function (event, ui) {
-                        // Update preview when color changes
-                        updatePreview();
-                    }
-                });
-
-                // Media uploader
-                // Media uploader
-                let mediaUploader;
-
-                $('#upload_icon_button').click(function (e) {
-                    e.preventDefault();
-                    if (mediaUploader) {
-                        mediaUploader.open();
-                        return;
-                    }
-                    mediaUploader = wp.media({
-                        title: 'Select Icon',
-                        button: {
-                            text: 'Use this image'
-                        },
-                        multiple: false
-                    });
-
-                    mediaUploader.on('select', function () {
-                        let attachment = mediaUploader.state().get('selection').first().toJSON();
-                        $('#icon_url').val(attachment.url);
-                        $('#icon_attachment_id').val(attachment.id);
-
-                        // Update preview using background-image
-                        $('#icon_preview').css({
-                            'background-image': 'url(' + attachment.url + ')'
-                        });
-                    });
-                    mediaUploader.open();
-                });
-
-                function updatePreview() {
-                    var verticalPos = $('select[name="<?php echo esc_attr($this->options_name); ?>[vertical_position]"]').val();
-                    var horizontalPos = $('select[name="<?php echo esc_attr($this->options_name); ?>[horizontal_position]"]').val();
-                    var verticalOffset = $('input[name="<?php echo esc_attr($this->options_name); ?>[vertical_offset]"]').val();
-                    var horizontalOffset = $('input[name="<?php echo esc_attr($this->options_name); ?>[horizontal_offset]"]').val();
-                    var backgroundColor = $('.color-field').val();
-
-                    $('#preview-icon').css({
-                        'top': verticalPos === 'top' ? verticalOffset + 'px' : 'auto',
-                        'bottom': verticalPos === 'bottom' ? verticalOffset + 'px' : 'auto',
-                        'left': horizontalPos === 'left' ? horizontalOffset + 'px' : 'auto',
-                        'right': horizontalPos === 'right' ? horizontalOffset + 'px' : 'auto',
-                        'background': backgroundColor || '#0073aa'
-                    });
-                }
-
-                // Bind events and initial update
-                $('select, input').on('change input', updatePreview);
-                updatePreview();
-            });
-        </script>
-
         <?php
     }
 
     /**
      * Callbacks for position section
      */
-    public function qwn_position_section_callback()
+    public function ahqwn_position_section_callback()
     {
         echo '<p>Configure the position of your notes icon on the page.</p>';
     }
@@ -402,7 +339,7 @@ class Quick_Web_Notes_Admin_Settings
      * 
      * @since 1.0.0
      */
-    public function sanitize_settings($input)
+    public function ahqwn_sanitize_settings($input)
     {
         // If input is not an array, return defaults
         if (!is_array($input)) {

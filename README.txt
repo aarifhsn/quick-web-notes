@@ -3,8 +3,8 @@ Contributors: aarifhsn
 Tags: notes, sticky notes, to-do list, reminder, note-taking
 Requires at least: 6.2
 Tested up to: 6.7
-Requires PHP: 7.4
-Stable tag: 1.0.3
+Requires PHP: 7.2
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,7 +17,7 @@ Quick Web Notes transforms how you capture and manage ideas in WordPress. Whethe
 = Key Features =
 
 * **Frontend Note Creation**: Add notes directly from any page without accessing the dashboard
-* **Shortcode Support**: Display your notes anywhere using [web-notes] shortcode
+* **Shortcode Support**: Display your notes anywhere using [ahqwn_notes] shortcode
 * **Icon Positioning**: Place the notes icon anywhere on your screen
 * **Background Color and Icon Uploader**: Customize the notes icon and background color
 * **Comprehensive Dashboard**: Manage all notes from a dedicated admin interface
@@ -36,7 +36,7 @@ Quick Web Notes transforms how you capture and manage ideas in WordPress. Whethe
 = Using Shortcode =
 
 Display your notes anywhere in your content using the shortcode:
-`[web-notes]`
+`[ahqwn_notes]`
 
 
 = Pro Features (Coming Soon) =
@@ -58,7 +58,7 @@ Display your notes anywhere in your content using the shortcode:
 4. Also from Frontend, you will get a floating notes icon to create or edit notes
 5. Go to 'Quick Web Notes > Settings' to reposition the notes icon, change the background color, and upload a custom icon
 6. Start creating notes!
-7. Use [web-notes] shortcode to display notes in your content
+7. Use [ahqwn_notes] shortcode to display notes in your content
 
 = Minimum Requirements =
 
@@ -74,7 +74,7 @@ Click the floating notes icon visible on your website, enter your note content, 
 
 = How can I display my notes in a post or page? =
 
-In frontpage, You will get a floating notes icon to create or edit notes automatically after the Installation. Also you can show notes using the [web-notes] shortcode wherever you want the notes to appear.
+In frontpage, You will get a floating notes icon to create or edit notes automatically after the Installation. Also you can show notes using the [ahqwn_notes] shortcode wherever you want the notes to appear.
 
 
 = Is there a limit to how many notes I can create? =
@@ -98,6 +98,16 @@ No, Quick Web Notes is optimized for performance. It loads resources only when n
 5. Frontedn Edit notes interface
 
 == Changelog ==
+* Enhanced database query security by implementing $wpdb->prepare() for all SQL queries
+* Added proper escaping and sanitization for database operations
+* Improved naming conventions to prevent potential plugin conflicts
+* Implemented unique prefixing across all plugin functions and classes
+* Added security checks to prevent direct file access
+* Removed unnecessary load_plugin_textdomain() call
+* Refactored function and class names
+
+= 1.0.4 =
+
 
 = 1.0.3 =
 * Minor updates on ownership verification

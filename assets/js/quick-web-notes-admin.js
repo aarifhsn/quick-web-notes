@@ -148,4 +148,65 @@ jQuery(document).ready(function ($) {
       $form.hide(300);
     }
   });
+
+  // inline scripts
+
+  // Media uploader
+  let mediaUploader;
+
+  $("#upload_icon_button").click(function (e) {
+    e.preventDefault();
+    if (mediaUploader) {
+      mediaUploader.open();
+      return;
+    }
+    mediaUploader = wp.media({
+      title: "Select Icon",
+      button: {
+        text: "Use this image",
+      },
+      multiple: false,
+    });
+
+    mediaUploader.on("select", function () {
+      let attachment = mediaUploader.state().get("selection").first().toJSON();
+      $("#icon_url").val(attachment.url);
+      $("#icon_attachment_id").val(attachment.id);
+
+      // Update preview using background-image
+      $("#icon_preview").css({
+        "background-image": "url(" + attachment.url + ")",
+      });
+    });
+    mediaUploader.open();
+  });
+
+  function updatePreview() {
+    // Use more generic selectors based on the actual form structure
+    var verticalPos = $('[name$="[vertical_position]"]').val();
+    var horizontalPos = $('[name$="[horizontal_position]"]').val();
+    var verticalOffset = $('[name$="[vertical_offset]"]').val();
+    var horizontalOffset = $('[name$="[horizontal_offset]"]').val();
+    var backgroundColor = $(".color-field").val();
+
+    $("#preview-icon").css({
+      top: verticalPos === "top" ? verticalOffset + "px" : "auto",
+      bottom: verticalPos === "bottom" ? verticalOffset + "px" : "auto",
+      left: horizontalPos === "left" ? horizontalOffset + "px" : "auto",
+      right: horizontalPos === "right" ? horizontalOffset + "px" : "auto",
+      background: backgroundColor || "#0073aa",
+    });
+  }
+
+  // Initialize color picker
+  $(".color-field").wpColorPicker({
+    change: function (event, ui) {
+      // Update preview when color changes
+      updatePreview();
+    },
+  });
+
+  // Bind events and initial update
+  $("select, input").on("change input", updatePreview);
+  updatePreview();
 });

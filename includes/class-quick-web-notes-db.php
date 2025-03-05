@@ -25,7 +25,7 @@ class Quick_Web_Notes_DB
      * 
      * @since 1.0.0
      */
-    public function qwn_create_tables()
+    public function ahqwn_create_tables()
     {
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
